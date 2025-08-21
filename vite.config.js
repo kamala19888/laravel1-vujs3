@@ -17,12 +17,19 @@ export default defineConfig({
                 },
             },
         }),
-        ViteVuetifyPlugin(),
+        ViteVuetifyPlugin({
+            autoImport: true, // أضف هذا الخيار
+        }),
     ],
     resolve: {
         alias: {
             vue: 'vue/dist/vue.esm-bundler.js',
-              '@': '/resources/js',
+            '@': '/resources/js',
         },
+    },
+    // أضف هذا القسم للتكيف مع Vercel
+    build: {
+        outDir: 'dist', // مجلد البناء الافتراضي الذي يتوقعه Vercel
+        emptyOutDir: true, // تنظيف مجلد البناء قبل كل بناء
     },
 });
