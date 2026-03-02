@@ -115,7 +115,7 @@ const createUser = () => {
 };
 const rulePassword=ref([
         v => !!v || 'password is required',
-        v => (v && v.length <= 8) || 'Name must be less than 8 characters',
+  v => (v && v.length >= 6) || 'Password must be at least 6 characters',
       ]);
 watchEffect(() => {
   if (props.user) {
@@ -132,15 +132,15 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <v-card class="mx-auto p-2" prepend-icon="mdi-home">
+  <v-card class="form-card p-2" prepend-icon="mdi-account-plus-outline">
     <template v-slot:title>
-      {{ props.user ? $t("update") : $t("create") }}
+      <span class="form-title">{{ props.user ? $t("update") : $t("create") }} {{ $t('users') }}</span>
     </template>
 
     <v-card-text>
       <v-form validate-on="submit lazy" @submit.prevent="createUser()">
-        <div class="row g-3 mt-5">
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-grid">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="name"
               :rules="[v => !!v || 'name is required']"
@@ -149,7 +149,7 @@ watchEffect(() => {
 
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="father_name"
               :rules="[v => !!v || 'father_name is required']"
@@ -157,7 +157,7 @@ watchEffect(() => {
               :label="$t('father name')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="date_of_birth"
               :rules="[v => !!v || 'date_of_birth is required']"
@@ -166,7 +166,7 @@ watchEffect(() => {
               :label="$t('date of birth')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="mobile"
               :rules="[v => !!v || 'mobile is required']"
@@ -175,7 +175,7 @@ watchEffect(() => {
               :label="$t('mobile')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="username"
               :rules="[v => !!v || 'username is required']"
@@ -183,7 +183,7 @@ watchEffect(() => {
               label="username"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="email"
               :rules="[v => !!v || 'email is required']"
@@ -192,7 +192,7 @@ watchEffect(() => {
               :label="$t('email')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="350" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
              <v-select
               v-model="gender"
               :rules="[v => !!v || 'gender is required']"
@@ -202,7 +202,7 @@ watchEffect(() => {
               return-object
             ></v-select>
           </v-sheet>
-          <v-sheet max-width="350" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
 
             <v-select
               v-model="role_id"
@@ -215,8 +215,8 @@ watchEffect(() => {
             >
             </v-select>
           </v-sheet>
-          <div v-if="!props.user" class="form-group row">
-                <div class="col-md-3">
+            <div v-if="!props.user" class="form-col-12 form-grid">
+              <div class="form-col-6">
                     <v-text-field
                     variant="solo"
                         v-model="password"
@@ -225,7 +225,7 @@ watchEffect(() => {
                         type="password"
                     ></v-text-field>
               </div>
-              <div class="col-md-3">
+              <div class="form-col-6">
                 <v-text-field
                 variant="solo"
                     v-model="password_confirmation"
@@ -237,12 +237,10 @@ watchEffect(() => {
               </div>
             </div>
         </div>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <div class="form-actions">
             <v-btn
             v-if="chickPermission('users', 'create') || chickPermission('users', 'update')"
               type="submit"
-              block
-              class="mt-2"
               :color="props.user ?'primary':'success' "
               :text="props.user ? $t('update') : $t('create')"
             ></v-btn>
@@ -250,11 +248,9 @@ watchEffect(() => {
             <v-btn
             color="warning"
              @click="goBack"
-              block
-              class="mt-2"
               :text="$t('back')"
             ></v-btn>
-          </v-sheet>
+          </div>
       </v-form>
     </v-card-text>
 

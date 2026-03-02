@@ -70,14 +70,14 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <v-card class="mx-auto p-2" prepend-icon="mdi-home">
+  <v-card class="form-card p-2" prepend-icon="mdi-cog-outline">
     <template v-slot:title>
-      {{ props.generalSetting ? $t("update") : $t("create") }}
+      <span class="form-title">{{ props.generalSetting ? $t("update") : $t("create") }} {{ $t('GeneralSettings') }}</span>
     </template>
     <v-card-text>
       <v-form validate-on="submit lazy" @submit.prevent="createGeneralSetting()">
-        <div class="row g-3 mt-5">
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-grid">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.name"
               :rules="[(v) => !!v || 'generalSetting is required']"
@@ -85,7 +85,7 @@ watchEffect(() => {
               :label="$t('name')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.email"
               :rules="[(v) => !!v || 'email is required']"
@@ -94,7 +94,7 @@ watchEffect(() => {
               :label="$t('email')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.facebook"
               :rules="[(v) => !!v || 'facebook is required']"
@@ -103,7 +103,7 @@ watchEffect(() => {
               :label="$t('facebook')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.youtube"
               :rules="[(v) => !!v || 'youtube is required']"
@@ -111,9 +111,9 @@ watchEffect(() => {
               :label="$t('youtube')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <!-- <label v-if="props.generalSetting" > {{ item.logo }}</label> -->
-            <img :src="'/'+item.logo" width="150">
+            <img class="form-file-preview" :src="'/'+item.logo" width="150">
             <input
             type="file"
             class="form-control"
@@ -122,7 +122,7 @@ watchEffect(() => {
             ref="file"
             />
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-select
               v-model="item.font_id"
               :label="$t('font')"
@@ -133,7 +133,7 @@ watchEffect(() => {
             >
             </v-select>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.font_size"
               :rules="[(v) => !!v || 'font_size is required']"
@@ -144,22 +144,18 @@ watchEffect(() => {
             ></v-text-field>
           </v-sheet>
         </div>
-        <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-actions">
           <v-btn
             type="submit"
-            block
-            class="mt-2"
             :color="props.generalSetting ? 'primary' : 'success'"
             :text="props.generalSetting ? $t('update') : $t('create')"
           ></v-btn>
           <v-btn
             color="warning"
             @click="goBack()"
-            block
-            class="mt-2"
             :text="$t('back')"
           ></v-btn>
-        </v-sheet>
+        </div>
       </v-form>
     </v-card-text>
     <hr />

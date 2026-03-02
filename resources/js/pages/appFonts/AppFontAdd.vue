@@ -59,14 +59,14 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <v-card class="mx-auto p-2" prepend-icon="mdi-home">
+  <v-card class="form-card p-2" prepend-icon="mdi-format-font">
     <template v-slot:title>
-      {{ props.appFont ? $t("update") : $t("create") }}
+      <span class="form-title">{{ props.appFont ? $t("update") : $t("create") }} {{ $t('appFonts') }}</span>
     </template>
     <v-card-text>
       <v-form validate-on="submit lazy" @submit.prevent="createAppFont()">
-        <div class="row g-3 mt-5">
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-grid">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.name_font"
               :rules="[(v) => !!v || 'appFont is required']"
@@ -74,7 +74,7 @@ watchEffect(() => {
               :label="$t('appFont')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <label v-if="props.appFont" > {{ item.path }}</label>
             <input
             type="file"
@@ -85,22 +85,18 @@ watchEffect(() => {
             />
           </v-sheet>
         </div>
-        <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-actions">
           <v-btn
             type="submit"
-            block
-            class="mt-2"
             :color="props.appFont ? 'primary' : 'success'"
             :text="props.appFont ? $t('update') : $t('create')"
           ></v-btn>
           <v-btn
             color="warning"
             @click="goBack()"
-            block
-            class="mt-2"
             :text="$t('back')"
           ></v-btn>
-        </v-sheet>
+        </div>
       </v-form>
     </v-card-text>
     <hr />

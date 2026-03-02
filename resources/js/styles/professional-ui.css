@@ -178,3 +178,177 @@ body {
 .dark-layout .form-control::placeholder {
   color: rgba(255, 255, 255, 0.6);
 }
+
+.form-card {
+  max-width: 980px;
+  margin: 0 auto;
+  border-radius: var(--ui-radius-lg);
+}
+
+.form-title {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.form-col-6 {
+  grid-column: span 6;
+}
+
+.form-col-12 {
+  grid-column: span 12;
+}
+
+.form-field {
+  width: 100%;
+  max-width: 100% !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+
+.form-card .v-sheet {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.form-card .v-input {
+  width: 100%;
+}
+
+.form-card .v-input .v-field {
+  border-radius: var(--ui-radius-sm) !important;
+}
+
+.form-card .v-input__details {
+  min-height: 0 !important;
+  padding-top: 4px !important;
+  background: transparent !important;
+}
+
+.form-card .v-messages {
+  min-height: 0 !important;
+}
+
+.form-card .v-field__input {
+  min-height: var(--ui-control-height) !important;
+}
+
+.form-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.form-actions .v-btn,
+.form-actions .btn {
+  min-width: 140px;
+}
+
+.form-file-preview {
+  max-width: 140px;
+  border-radius: var(--ui-radius-sm);
+  border: 1px solid rgba(var(--bs-secondary-rgb), 0.2);
+  margin-bottom: 8px;
+}
+
+.dark-layout .form-card {
+  background: #1f2434 !important;
+  color: #e9edf4;
+}
+
+.dark-layout .form-card .v-card-text,
+.dark-layout .form-card .v-card-title {
+  color: #e9edf4;
+}
+
+.dark-layout .form-card .v-field {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: none !important;
+}
+
+.dark-layout .form-card .v-input .v-field,
+.dark-layout .form-card .v-field--variant-solo,
+.dark-layout .form-card .v-field--variant-solo-filled {
+  background: #2a3148 !important;
+}
+
+.dark-layout .form-card .v-field__overlay {
+  background: #2a3148 !important;
+  opacity: 1 !important;
+}
+
+.dark-layout .form-card .v-field__field {
+  background: transparent !important;
+}
+
+.dark-layout .form-card .v-input__details,
+.dark-layout .form-card .v-messages,
+.dark-layout .form-card .v-input__details * {
+  background: transparent !important;
+  color: rgba(238, 242, 255, 0.86) !important;
+}
+
+.dark-layout .form-card .v-field__outline,
+.dark-layout .form-card .v-field__loader {
+  display: none !important;
+}
+
+.dark-layout .form-card .v-field:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-layout .form-card .v-field--focused {
+  border-color: rgba(var(--bs-primary-rgb), 0.75) !important;
+}
+
+.dark-layout .form-card .v-field__input,
+.dark-layout .form-card input,
+.dark-layout .form-card .v-select__selection,
+.dark-layout .form-card .v-label {
+  color: #eef2ff !important;
+}
+
+.dark-layout .form-card .v-field input {
+  color: #eef2ff !important;
+  -webkit-text-fill-color: #eef2ff !important;
+}
+
+.dark-layout .form-card .v-field__input::placeholder,
+.dark-layout .form-card input::placeholder {
+  color: rgba(238, 242, 255, 0.62) !important;
+}
+
+.dark-layout .form-card .v-icon {
+  color: rgba(238, 242, 255, 0.82) !important;
+}
+
+.dark-layout .form-card .v-input--error .v-field {
+  border-color: rgba(255, 99, 132, 0.85) !important;
+}
+
+@media (max-width: 991px) {
+  .form-col-6,
+  .form-col-12 {
+    grid-column: span 12;
+  }
+
+  .form-actions {
+    justify-content: stretch;
+  }
+
+  .form-actions .v-btn,
+  .form-actions .btn {
+    width: 100%;
+  }
+}

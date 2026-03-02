@@ -57,15 +57,15 @@ watchEffect(() => {
 });
 </script>
 <template>
-  <v-card class="mx-auto p-2" prepend-icon="mdi-home">
+  <v-card class="form-card p-2" prepend-icon="mdi-file-tree-outline">
     <template v-slot:title>
-      {{ props.user ? $t("update") : $t("create") }}
+      <span class="form-title">{{ props.page ? $t("update") : $t("create") }} {{ $t('pages') }}</span>
     </template>
 
     <v-card-text>
       <v-form validate-on="submit lazy" @submit.prevent="createPage()">
-        <div class="row g-3 mt-5">
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-grid">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.page"
               :rules="[(v) => !!v || 'page is required']"
@@ -73,7 +73,7 @@ watchEffect(() => {
               :label="$t('page')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.path"
               :rules="[(v) => !!v || 'path is required']"
@@ -81,7 +81,7 @@ watchEffect(() => {
               :label="$t('path')"
             ></v-text-field>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.icon"
               :rules="[(v) => !!v || 'icon is required']"
@@ -90,7 +90,7 @@ watchEffect(() => {
             ></v-text-field>
           </v-sheet>
 
-          <v-sheet max-width="350" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-select
               v-model="item.page_id"
               :label="$t('page')"
@@ -101,7 +101,7 @@ watchEffect(() => {
             >
             </v-select>
           </v-sheet>
-          <v-sheet max-width="300" class="col-md-6 m-auto">
+          <v-sheet class="form-field form-col-6">
             <v-text-field
               v-model="item.order"
               :rules="[(v) => !!v || 'order is required']"
@@ -110,11 +110,9 @@ watchEffect(() => {
             ></v-text-field>
           </v-sheet>
         </div>
-        <v-sheet max-width="300" class="col-md-6 m-auto">
+        <div class="form-actions">
             <v-btn
               type="submit"
-              block
-              class="mt-2"
               :color="props.page ?'primary':'success' "
               :text="props.page ? $t('update') : $t('create')"
             ></v-btn>
@@ -122,11 +120,9 @@ watchEffect(() => {
             <v-btn
             color="warning"
              @click="goBack()"
-              block
-              class="mt-2"
               :text="$t('back')"
             ></v-btn>
-          </v-sheet>
+          </div>
       </v-form>
     </v-card-text>
 
