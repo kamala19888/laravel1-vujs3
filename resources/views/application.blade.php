@@ -11,8 +11,12 @@
         rel="stylesheet">
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     @include('layouts.app-assets-head')
+    @php
+        $fontFamily = data_get($setting, 'font.name_font', 'Montserrat');
+        $fontSize = data_get($setting, 'font_size', 1);
+    @endphp
     <style>
-        @foreach ($fonts as $font )
+        @foreach (($fonts ?? []) as $font )
             @font-face {
                         font-family: {{ $font->name_font }};
                         src: url({{( $font->path)}});
@@ -21,9 +25,9 @@
 
 
         body {
-            font-family: {{ $setting['font']['name_font'] }} !important;
+            font-family: {{ $fontFamily }} !important;
             text-align: right !important;
-            font-size: {{ $setting['font_size'] }}em !important;
+            font-size: {{ $fontSize }}em !important;
         }
         @include('layouts.app-assets-style') table tr:nth-child(even) {
             background: #eef0f2;

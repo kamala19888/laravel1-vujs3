@@ -32,13 +32,15 @@ const logout = () => {
     .then((res) => {
       localStorage.removeItem("token");
       localStorage.removeItem("perUser");
+      localStorage.removeItem("setting");
       window.location.href = "/login";
     })
     .catch((err) => {
-      console.log(err);
+      localStorage.removeItem("token");
+      localStorage.removeItem("perUser");
+      localStorage.removeItem("setting");
+      window.location.href = "/login";
     });
-  localStorage.removeItem("token");
-  window.location.href = "/login";
 };
 </script>
 <template>
@@ -149,7 +151,7 @@ const logout = () => {
             aria-expanded="false"
           >
             <img
-              :src="`../app-assets/images/icons/translation.png`"
+              :src="`/app-assets/images/icons/translation.png`"
               alt="png"
               height="32"
             />
@@ -224,7 +226,7 @@ const logout = () => {
                   <div class="me-1">
                     <div class="avatar">
                       <img
-                        :src="'assets/images/portrait114x113.png'"
+                        :src="'/app-assets/images/portrait/small/avatar-s-11.jpg'"
                         alt="avatar"
                         width="32"
                         height="32"
@@ -304,8 +306,10 @@ const logout = () => {
           >
             <div   class="user-nav d-sm-flex d-none">
               <span class="user-name fw-bolder">
+                {{ props.user && props.user.name ? props.user.name : 'User' }}
               </span>
               <span class="user-status">
+                {{ props.user && props.user.role && props.user.role.name_role ? props.user.role.name_role : 'Member' }}
               </span>
             </div>
             <span class="avatar">
@@ -313,7 +317,7 @@ const logout = () => {
                 alt="avatar"
                 width="50"
                 height="50"
-                     :src="`../images/user/${props.user.photo}`"
+                     :src="props.user && props.user.photo ? `/images/user/${props.user.photo}` : '/app-assets/images/portrait/small/avatar-s-11.jpg'"
           />
               <span class="avatar-status-online"></span>
             </span>
@@ -416,7 +420,7 @@ const logout = () => {
       >
         <div class="d-flex">
           <div class="me-75">
-            <img :src="`../app-assets/images/icons/xls.png`" alt="png" height="32" />
+            <img :src="`/app-assets/images/icons/xls.png`" alt="png" height="32" />
           </div>
           <div class="search-data">
             <p class="search-data-title mb-0">omar new item submitted</p>
