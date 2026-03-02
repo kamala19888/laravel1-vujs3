@@ -9,21 +9,6 @@ const router = createRouter({
             component: () => import('../pages/Login.vue')
         },
         {
-            path: '/register',
-            name: 'Register',
-            component: () => import('../pages/Register.vue')
-        },
-        {
-            path: '/forgot-password',
-            name: 'ForgotPassword',
-            component: () => import('../pages/ForgotPassword.vue')
-        },
-        {
-            path: '/reset-password-form',
-            name: 'ResetPasswordForm',
-            component: () => import('../pages/ResetPasswordForm.vue')
-        },
-        {
             path: '/reset-password-form-sent',
             name: 'ResetPasswordFormSent',
             component: () => import('../pages/ResetPasswordFormSent.vue')
@@ -83,14 +68,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    if ((to.name === 'Register'|| to.name === 'ForgotPassword'|| to.name === 'ResetPasswordForm')&& !isUserLoggedIn()) {
-        next()
-    }
-    else if (to.name !== 'Login' && !isUserLoggedIn())
+    if (to.name !== 'Login' && !isUserLoggedIn())
      {
         next({ name: 'Login' })
      }
-    else if ((to.name === 'Login' || to.name === 'Register' ) && isUserLoggedIn()) {
+    else if (to.name === 'Login' && isUserLoggedIn()) {
         next({ name: 'Admin' })
     }
     else {

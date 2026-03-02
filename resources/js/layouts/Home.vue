@@ -1,15 +1,41 @@
 <script setup>
-import { ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import Sidebar from "./SidBarComponent.vue";
 import TopBar from "./TopBarComponent.vue";
 import Footer from "./FooterComponent.vue";
+import { applyThemeMode, getStoredThemeMode, setThemeMode } from "../utils/theme";
 const toggled = ref("");
 const token = localStorage.getItem("token");
 const user = ref("");
 const setting = ref({});
 const authReady = ref(!token);
+const themeMode = ref(getStoredThemeMode());
+const activeTheme = ref(applyThemeMode(themeMode.value));
+let autoThemeTimer = null;
 const Dir = localStorage.getItem("direction");
 const textAlign = ref("right");
+
+const changeThemeMode = (mode) => {
+  themeMode.value = mode;
+  activeTheme.value = setThemeMode(mode);
+};
+
+onMounted(() => {
+  activeTheme.value = applyThemeMode(themeMode.value);
+
+  autoThemeTimer = window.setInterval(() => {
+    if (themeMode.value === "auto") {
+      activeTheme.value = applyThemeMode("auto");
+    }
+  }, 60000);
+});
+
+onBeforeUnmount(() => {
+  if (autoThemeTimer) {
+    window.clearInterval(autoThemeTimer);
+  }
+});
+
 if(token){
 axios.get('/user').then((res) => {
       user.value = res.data.user;
@@ -32,20 +58,27 @@ axios.get('/user').then((res) => {
 }
 </script>
 <template>
-  <div  >
+  <div class="app-shell">
     <!-- Sidebar -->
-    <Sidebar v-if="token && authReady" :toggled="toggled" />
+    <Sidebar v-if="token && authReady" :toggled="toggled" :active-theme="activeTheme" />
     <!-- End of Sidebar -->
     <!-- Content Wrapper -->
-    <div  >
+    <div class="app-main-wrapper">
       <!-- Main Content -->
-      <div  >
+      <div class="app-main-content">
         <!-- Topbar -->
-        <TopBar v-if="token && authReady" @emitToggled="toggled = $event" :user="user" />
+        <TopBar
+          v-if="token && authReady"
+          @emitToggled="toggled = $event"
+          @changeTheme="changeThemeMode"
+          :user="user"
+          :theme-mode="themeMode"
+          :active-theme="activeTheme"
+        />
         <!-- End of Topbar -->
         <!-- Begin Page Content -->
         <div
-    class="app-content content"
+      class="app-content content app-content-fill"
     :style="`text-align: ${textAlign}!important`"
   >
   <div class="content-overlay"></div>
@@ -60,11 +93,34 @@ axios.get('/user').then((res) => {
       </div>
       <!-- End of Main Content -->
       <!-- Footer -->
-      <Footer v-if="token && authReady" />
+      <Footer v-if="token && authReady" :active-theme="activeTheme" />
       <!-- End of Footer -->
     </div>
     <!-- End of Content Wrapper -->
   </div>
 </template>
 <style scoped>
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-main-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+}
+
+.app-content-fill {
+  flex: 1 0 auto;
+}
+
+:deep(.sticky-footer) {
+  margin-top: auto;
+}
 </style>

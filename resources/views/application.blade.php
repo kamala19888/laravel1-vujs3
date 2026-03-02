@@ -49,5 +49,18 @@
 <script>
     document.body.style.direction = localStorage.getItem("direction") ? localStorage.getItem("direction") : 'rtl';
     document.body.style.textAlign = localStorage.getItem("textAlign") ? localStorage.getItem("textAlign") : 'right';
+
+    const savedThemeMode = localStorage.getItem("themeMode") || "auto";
+    const currentHour = new Date().getHours();
+    const autoTheme = (currentHour >= 18 || currentHour < 6) ? "dark" : "light";
+    const activeTheme = savedThemeMode === "auto" ? autoTheme : savedThemeMode;
+
+    if (activeTheme === "dark") {
+        document.body.classList.add("dark-layout");
+        document.documentElement.classList.add("dark-layout");
+    } else {
+        document.body.classList.remove("dark-layout");
+        document.documentElement.classList.remove("dark-layout");
+    }
 </script>
 </html>

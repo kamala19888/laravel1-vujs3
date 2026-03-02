@@ -24,9 +24,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/reset-password', [AuthController::class, 'ResetPassword']);
 Route::get('/get-i18n', [LangController::class, 'getI18n'])->name('getI18n');
 
 Route::group(['middleware'=>['auth:sanctum']], function(){
@@ -40,6 +38,7 @@ Route::group(['middleware'=>['auth:sanctum']], function(){
 
     Route::get('/index-users', [UserController::class, 'indexUsers']);
     Route::post('/create-user', [UserController::class, 'store']);
+    Route::delete('/delete-user/{id}', [UserController::class, 'destroy']);
 
 
     Route::get('/get-pages', [PageController::class, 'getPages']);

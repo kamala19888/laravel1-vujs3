@@ -1,12 +1,14 @@
 <script setup>
 import { ref } from 'vue';
 import AppFontAdd from "./AppFontAdd.vue";
+import InteractiveTable from "@/components/InteractiveTable.vue";
 import { onMounted } from "@vue/runtime-core";
 import axios from "axios";
 import { toast } from "vue3-toastify";
 const isEdit = ref(false);
 const appFont = ref({});
 const AppFonts = ref([]);
+const tableRows = ref([]);
 const notify = (message) => {
   toast.success(message, {
     autoClose: 3000,
@@ -30,6 +32,10 @@ const addAppFont = () => {
 const getAppFonts= () =>{
     axios.get(`get-app-fonts`).then((res) => {
         AppFonts.value = res.data.appFonts;
+        tableRows.value = (res.data.appFonts || []).map((item) => ({
+          ...item,
+          fontInfo: `${item.name_font || ''} ${item.path || ''}`.trim(),
+        }));
 
     });
 }
@@ -53,65 +59,59 @@ const chickPermission=(page,per)=>{
             return false;
         }
 }
+const tableColumns = ref([
+  { key: "actions", label: "الإجراءات", visible: chickPermission('appFonts','delete') || chickPermission('appFonts','edit'), sortable: false },
+  { key: "id", label: "المعرف" },
+  { key: "fontInfo", label: "الاسم" },
+  { key: "deleteAction", label: "حذف", visible: chickPermission('appFonts','delete'), sortable: false },
+]);
 </script>
 <template>
   <div>
     <AppFontAdd v-if="isEdit"  @goBack="goBack($event)" :appFont="appFont" />
-    <div v-if="!isEdit" class="card o-hidden border-0 shadow-lg my-5">
-      <div class="card-header">
-        <h4 class="card-title" >{{ $t('table') }} {{ $t('appFonts') }} </h4>
-        <v-btn
-        v-if="chickPermission('appFonts','create')"
-        @click="addAppFont"
-        class="ma-2"
-        color="indigo"
-        icon="mdi-plus"
-      ></v-btn>
+    <div v-if="!isEdit" class="card o-hidden border-0 shadow-lg my-5 page-card">
+      <div class="card-header page-header-bar">
+        <div class="page-title-wrap">
+          <h4 class="card-title page-title">{{ $t('table') }} {{ $t('appFonts') }}</h4>
+          <p class="page-subtitle">إدارة الخطوط المرفوعة وتفعيلها داخل النظام</p>
+        </div>
+        <div class="page-actions">
+          <v-btn
+            v-if="chickPermission('appFonts','create')"
+            @click="addAppFont"
+            class="ma-2"
+            color="indigo"
+            icon="mdi-plus"
+          ></v-btn>
+        </div>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-bordered text-center" width="100%">
-            <thead>
-              <tr>
-                <th
+          <InteractiveTable
+            :columns="tableColumns"
+            :rows="tableRows"
+            row-key="id"
+            search-placeholder="بحث في خطوط التطبيق"
+          >
+            <template #cell-actions="{ row }">
+              <v-btn
                 v-if="chickPermission('appFonts','edit')"
-                >{{ $t('actions') }}</th>
-                <th>{{ $t('id') }}</th>
-                <th>{{ $t('name') }}</th>
-                <th v-if="chickPermission('appFonts','delete') ">{{ $t('delete') }}</th>
-              </tr>
-            </thead>
-            <tfoot></tfoot>
-            <tbody>
-              <tr v-for="appFont in AppFonts" :key="appFont.id">
-                <td  v-if="chickPermission('appFonts','delete') || chickPermission('appFonts','edit')" >
-
-                  <v-btn
-                  v-if="chickPermission('appFonts','edit')"
-                   @click="appFontEdit(appFont)"
-                    class="ma-2"
-                    color="orange-darken-2"
-                    icon="mdi-pencil"
-                ></v-btn>
-
-                </td>
-                <td>
-                    {{ appFont.id }}
-                </td>
-                <td>
-                    {{ appFont.name_font }} <br />
-                    {{ appFont.path }}
-                </td>
-                <td v-if="chickPermission('appFonts','delete') " >
-                    <button
-
-                   class="btn btn-danger btn-circle btn-sm m-1">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                @click="appFontEdit(row)"
+                class="ma-2"
+                color="orange-darken-2"
+                icon="mdi-pencil"
+              ></v-btn>
+            </template>
+            <template #cell-fontInfo="{ row }">
+              {{ row.name_font }} <br />
+              {{ row.path }}
+            </template>
+            <template #cell-deleteAction>
+              <button class="btn btn-danger btn-circle btn-sm m-1">
+                <i class="fas fa-trash"></i>
+              </button>
+            </template>
+          </InteractiveTable>
         </div>
       </div>
     </div>

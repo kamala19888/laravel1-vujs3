@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from "vue";
+const props = defineProps(["activeTheme"]);
 const parseSetting = () => {
     try {
         const rawValue = localStorage.getItem("setting");
@@ -14,7 +15,7 @@ const parseSetting = () => {
 const setting = parseSetting();
 </script>
 <template>
-      <footer class="sticky-footer bg-white">
+      <footer :class="`sticky-footer ${props.activeTheme === 'dark' ? 'bg-dark text-white' : 'bg-white'}`">
         <div class="container my-auto">
             <div class="copyright text-center my-auto">
                 <span>Copyright &copy; {{ setting.name || 'Dashboard' }} 2024</span>

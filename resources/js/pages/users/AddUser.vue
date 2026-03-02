@@ -33,6 +33,7 @@ const chickPermission = (page, per) => {
 };
 const id = ref("");
 const name = ref("");
+const username = ref("");
 const email = ref("");
 const father_name = ref("");
 const date_of_birth = ref("");
@@ -55,6 +56,7 @@ const confirmPass = () => {
 };
 const goBack = () => {
   name.value = "";
+  username.value = "";
   email.value = "";
   father_name.value = "";
   gender.value = "";
@@ -67,19 +69,21 @@ const goBack = () => {
 const createUser = () => {
   if (
     (name.value === "" ||
+      username.value === "" ||
       email.value === "" ||
       password.value === "" ||
       password_confirmation.value === "") &&
     !props.user
   ) {
     alert("Please fill all fields");
-  } else if (name.value === "" || email.value === "") {
+  } else if (name.value === "" || username.value === "" || email.value === "") {
     alert("Please fill all fields");
   } else {
     axios
       .post("/create-user", {
         id: id.value,
         name: name.value,
+        username: username.value,
         email: email.value,
         father_name: father_name.value,
         gender: gender.value,
@@ -94,6 +98,7 @@ const createUser = () => {
         emit("goBack", false);
         id.value = "";
         name.value = "";
+        username.value = "";
         email.value = "";
         father_name.value = "";
         gender.value = "";
@@ -116,6 +121,7 @@ watchEffect(() => {
   if (props.user) {
     id.value = props.user.id;
     name.value = props.user.name;
+    username.value = props.user.username;
     email.value = props.user.email;
     father_name.value = props.user.father_name;
     date_of_birth.value = props.user.date_of_birth;
@@ -167,6 +173,14 @@ watchEffect(() => {
               variant="solo"
               type="number"
               :label="$t('mobile')"
+            ></v-text-field>
+          </v-sheet>
+          <v-sheet max-width="300" class="col-md-6 m-auto">
+            <v-text-field
+              v-model="username"
+              :rules="[v => !!v || 'username is required']"
+              variant="solo"
+              label="username"
             ></v-text-field>
           </v-sheet>
           <v-sheet max-width="300" class="col-md-6 m-auto">

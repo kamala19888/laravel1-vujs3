@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { onMounted, watchEffect } from "@vue/runtime-core";
 import axios from "axios";
 import { toast } from "vue3-toastify";
+import InteractiveTable from "@/components/InteractiveTable.vue";
 const isEdit = ref(false);
 const permission = ref({});
 const Permissions = ref([]);
@@ -101,20 +102,37 @@ const chickPermission = (page, per) => {
     return false;
   }
 };
+const tableColumns = ref([
+  { key: "pageName", label: "الصفحة" },
+  { key: "read", label: "قراءة", sortable: false },
+  { key: "edit", label: "تعديل", sortable: false },
+  { key: "create", label: "إنشاء", sortable: false },
+  { key: "update", label: "تحديث", sortable: false },
+  { key: "delete", label: "حذف", sortable: false },
+]);
+const permissionRows = ref([]);
 watchEffect(() => {
   // This will be called whenever role_id changes
   console.log("role_id changed:", role_id.value);
 
   // You can call your getPermissions method here
   getPermissions();
+  permissionRows.value = (Pages.value || []).map((page) => ({
+    ...page,
+    pageName: page.page,
+  }));
 });
 </script>
 <template>
   <div>
-    <div v-if="!isEdit" class="card o-hidden border-0 shadow-lg my-5">
-      <div class="card-header">
-        <h4 class="card-title">
-          <v-sheet max-width="200">
+    <div v-if="!isEdit" class="card o-hidden border-0 shadow-lg my-5 page-card">
+      <div class="card-header page-header-bar">
+        <div class="page-title-wrap">
+          <h4 class="card-title page-title">{{ $t("table") }} {{ $t("permissions") }}</h4>
+          <p class="page-subtitle">تعديل صلاحيات الأدوار بشكل مباشر وسريع</p>
+        </div>
+        <div class="page-actions">
+          <v-sheet max-width="230">
             <v-select
               v-model="role_id"
               :label="$t('role')"
@@ -125,89 +143,62 @@ watchEffect(() => {
             >
             </v-select>
           </v-sheet>
-          <!-- <select  v-model="role_id" class="form-control "    >
-                <option value="0">{{ $t('Select Role') }}</option>
-                <option v-for="role in Roles" :key="role.id" :value="role.id">{{ role.name_role }}</option>
-              </select> -->
-        </h4>
-        <h4 class="card-title">{{ $t("table") }} {{ $t("permissions") }}</h4>
+        </div>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table
+          <InteractiveTable
             v-if="role_id != 0"
-            class="table table-bordered text-center"
-            width="100%"
+            :columns="tableColumns"
+            :rows="permissionRows"
+            row-key="id"
+            :enable-pagination="false"
+            search-placeholder="بحث في صلاحيات الصفحات"
           >
-            <thead>
-              <tr>
-                <th>{{ $t("page") }}</th>
-                <th>{{ $t("read") }}</th>
-                <th>{{ $t("edit") }}</th>
-                <th>{{ $t("create") }}</th>
-                <th>{{ $t("update") }}</th>
-                <th>{{ $t("delete") }}</th>
-              </tr>
-            </thead>
-            <tfoot></tfoot>
-            <tbody>
-              <tr v-for="page in Pages" :key="page.id">
-                <td>
-                  {{ $t(page.page) }}
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    :disabled="!chickPermission('permissions', 'update')"
-                    :checked="getPermission(page.id, role_id, 'read')"
-                    @change="
-                      updatePermission(page.id, role_id, 'read', $event.target.checked)
-                    "
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    :disabled="!chickPermission('permissions', 'update')"
-                    :checked="getPermission(page.id, role_id, 'edit')"
-                    @change="
-                      updatePermission(page.id, role_id, 'edit', $event.target.checked)
-                    "
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    :disabled="!chickPermission('permissions', 'update')"
-                    :checked="getPermission(page.id, role_id, 'create')"
-                    @change="
-                      updatePermission(page.id, role_id, 'create', $event.target.checked)
-                    "
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    :disabled="!chickPermission('permissions', 'update')"
-                    :checked="getPermission(page.id, role_id, 'update')"
-                    @change="
-                      updatePermission(page.id, role_id, 'update', $event.target.checked)
-                    "
-                  />
-                </td>
-                <td>
-                  <input
-                    type="checkbox"
-                    :disabled="!chickPermission('permissions', 'update')"
-                    :checked="getPermission(page.id, role_id, 'delete')"
-                    @change="
-                      updatePermission(page.id, role_id, 'delete', $event.target.checked)
-                    "
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <template #cell-pageName="{ row }">
+              {{ $t(row.page) }}
+            </template>
+            <template #cell-read="{ row }">
+              <input
+                type="checkbox"
+                :disabled="!chickPermission('permissions', 'update')"
+                :checked="getPermission(row.id, role_id, 'read')"
+                @change="updatePermission(row.id, role_id, 'read', $event.target.checked)"
+              />
+            </template>
+            <template #cell-edit="{ row }">
+              <input
+                type="checkbox"
+                :disabled="!chickPermission('permissions', 'update')"
+                :checked="getPermission(row.id, role_id, 'edit')"
+                @change="updatePermission(row.id, role_id, 'edit', $event.target.checked)"
+              />
+            </template>
+            <template #cell-create="{ row }">
+              <input
+                type="checkbox"
+                :disabled="!chickPermission('permissions', 'update')"
+                :checked="getPermission(row.id, role_id, 'create')"
+                @change="updatePermission(row.id, role_id, 'create', $event.target.checked)"
+              />
+            </template>
+            <template #cell-update="{ row }">
+              <input
+                type="checkbox"
+                :disabled="!chickPermission('permissions', 'update')"
+                :checked="getPermission(row.id, role_id, 'update')"
+                @change="updatePermission(row.id, role_id, 'update', $event.target.checked)"
+              />
+            </template>
+            <template #cell-delete="{ row }">
+              <input
+                type="checkbox"
+                :disabled="!chickPermission('permissions', 'update')"
+                :checked="getPermission(row.id, role_id, 'delete')"
+                @change="updatePermission(row.id, role_id, 'delete', $event.target.checked)"
+              />
+            </template>
+          </InteractiveTable>
         </div>
       </div>
     </div>

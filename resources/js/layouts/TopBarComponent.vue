@@ -1,8 +1,8 @@
 <script setup>
 import { ref } from "vue";
 const toggled = ref("");
-const emit = defineEmits(["emitToggled"]);
-const props = defineProps(["user"]);
+const emit = defineEmits(["emitToggled", "changeTheme"]);
+const props = defineProps(["user", "themeMode", "activeTheme"]);
 const lang = localStorage.getItem("lang");
 const sidebarToggleTop = () => {
   if (toggled.value === "") {
@@ -15,6 +15,9 @@ const sidebarToggleTop = () => {
 };
 const messages = ref([]);
 const textAlign = ref("right");
+const changeTheme = (mode) => {
+  emit("changeTheme", mode);
+};
 const changeLanguage = (lang) => {
   localStorage.setItem("lang", lang);
   if (lang == "ar") {
@@ -45,7 +48,7 @@ const logout = () => {
 </script>
 <template>
    <nav
-    class="header-navbar navbar navbar-expand-lg align-items-center floating-nav navbar-light navbar-shadow container-xxl"
+    :class="`header-navbar navbar navbar-expand-lg align-items-center floating-nav navbar-shadow container-xxl ${props.activeTheme === 'dark' ? 'navbar-dark' : 'navbar-light'}`"
   >
     <div class="navbar-container d-flex content">
       <div class="bookmark-wrapper d-flex align-items-center">
@@ -196,6 +199,46 @@ const logout = () => {
             >
               <i class="flag-icon flag-icon-fr"></i>
               {{ $t("French") }}
+            </a>
+          </div>
+        </li>
+        <li class="nav-item dropdown dropdown-language">
+          <a
+            class="nav-link dropdown-toggle"
+            href="#"
+            data-bs-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <i class="ficon" :data-feather="props.activeTheme === 'dark' ? 'moon' : 'sun'"></i>
+          </a>
+          <div class="dropdown-menu dropdown-menu-end">
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('light')"
+              :class="{ active: props.themeMode === 'light' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              Light
+            </a>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('dark')"
+              :class="{ active: props.themeMode === 'dark' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              Dark
+            </a>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('auto')"
+              :class="{ active: props.themeMode === 'auto' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              Auto
             </a>
           </div>
         </li>

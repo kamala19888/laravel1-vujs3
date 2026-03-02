@@ -7,50 +7,48 @@ use App\Models\GeneralSetting;
 use App\Models\User;
 use App\Models\UserPhoto;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
 {
     public function register(Request $request)
     {
-        validator($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed'
-        ]);
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password)
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
         return response()->json([
-            'status' => 200,
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-        ]);
+            'status' => 403,
+            'message' => 'Self registration is disabled',
+        ], 403);
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'username' => ['required', 'string', 'max:100'],
+            'password' => ['required', 'string', 'min:6'],
         ]);
 
-        if (!$token = auth()->attempt($credentials)) {
+        $throttleKey = Str::lower($credentials['username']).'|'.$request->ip();
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
             return response()->json([
-                'status' => 401,
-                'message' => 'Unauthorized'
-            ]);
+                'status' => 429,
+                'message' => 'Too many login attempts. Please try again later.',
+            ], 429);
         }
 
-        $user = auth()->user();
+        $user = User::where('username', $credentials['username'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            RateLimiter::hit($throttleKey, 60);
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        RateLimiter::clear($throttleKey);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -90,41 +88,10 @@ class AuthController extends Controller
     }
     public function ResetPassword(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-
-                'message' => 'Invalid email format',
-            ]);
-        }
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'We cant find a user with that e-mail address.',
-            ]);
-        }
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        $to_email = $request->email;
-        $subject = 'Reset Password Notification';
-        $from_email = 'app@gmail.com';
-        $name = $user->name;
-
-        $data = array('name' => $name, 'token' => $token);
-        Mail::send('emails.mail', $data, function ($message) use ($to_email, $subject, $from_email) {
-            $message->to($to_email)->subject($subject);
-            $message->from($from_email);
-        });
-
         return response()->json([
-            'status' => 200,
-            'message' => 'email sent'
-        ]);
+            'status' => 403,
+            'message' => 'Public password reset is disabled',
+        ], 403);
     }
 
     public function ResetPass(Request $request)
@@ -144,6 +111,7 @@ class AuthController extends Controller
         $id = $request->user()->id;
         validator($request->all(), [
             'name' => 'required',
+            'username' => ['required', 'string', 'max:100', Rule::unique('users')->ignore($id, 'id')],
             'email' => ['required',
             Rule::unique('users')->ignore($id, 'id'),
         ],
@@ -155,6 +123,7 @@ class AuthController extends Controller
             'father_name' => $request->father_name,
             'date_of_birth' => $request->date_of_birth,
             'mobile' => $request->mobile,
+            'username' => $request->username,
             'email' => $request->email,
         ]);
         return response()->json([

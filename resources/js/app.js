@@ -1,6 +1,8 @@
 import './bootstrap';
 import './plugins/axios';
 import vuetify from './vuetify'
+import './styles/theme-mode.css'
+import './styles/professional-ui.css'
 import 'vuetify/dist/vuetify.min.css';
 import 'vue-select/dist/vue-select.css'
 import v2Select from 'vue-select';

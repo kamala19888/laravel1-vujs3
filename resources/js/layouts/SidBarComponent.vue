@@ -5,7 +5,7 @@ onMounted(async () => {
    await  getPages();
 });
 const props = defineProps([
-    "toggled"]
+  "toggled", "activeTheme"]
 )
 const defaultPages = [
   { id: 'default-admin', page: 'Admin', icon: 'fas fa-fw fa-tachometer-alt', path: '/admin', page_id: 0, pages: [] },
@@ -78,7 +78,7 @@ const perUser = ref(parseLocalJson("perUser", []));
 <template>
   <!-- BEGIN: Main Menu-->
   <div
-    class="main-menu menu-fixed menu-light menu-accordion menu-shadow"
+    :class="`main-menu menu-fixed menu-accordion menu-shadow ${props.activeTheme === 'dark' ? 'menu-dark' : 'menu-light'}`"
     data-scroll-to-active="true"
     :style="`text-align: ${textAlign}!important`"
   >
@@ -160,6 +160,6 @@ const perUser = ref(parseLocalJson("perUser", []));
 <style scoped>
 .navigation li a i{
     font-size:18px;
-    color: #206a7c;
+  color: currentColor;
 }
 </style>

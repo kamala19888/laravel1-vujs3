@@ -9,6 +9,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class InitialAppDataSeeder extends Seeder
 {
@@ -70,5 +71,15 @@ class InitialAppDataSeeder extends Seeder
         );
 
         User::whereNull('role_id')->update(['role_id' => $adminRole->id]);
+
+        User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'name' => 'Primary Admin',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('115599'),
+                'role_id' => $adminRole->id,
+            ]
+        );
     }
 }

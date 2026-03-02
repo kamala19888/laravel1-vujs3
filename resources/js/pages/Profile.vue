@@ -1,11 +1,16 @@
 <script setup>
 import { ref } from 'vue'
 import   photoComponent from  '@/components/photoComponent.vue'
+import InteractiveTable from '@/components/InteractiveTable.vue'
 import {toast} from "vue3-toastify"
 const result  = ref(false)
 const props = defineProps([
     "user"]
 )
+const tableColumns = ref([
+    { key: 'actions', label: 'الإجراءات', sortable: false },
+    { key: 'photoPreview', label: 'الصورة', sortable: false },
+])
 const notify = (message) => {
     toast.success(message,
     {
@@ -23,11 +28,12 @@ const notifyError = (message) => {
     );
 }
 const UserUpdate = () => {
-    if (props.user.name === '' || props.user.email === '' ) {
+    if (props.user.name === '' || props.user.username === '' || props.user.email === '' ) {
         notifyError('Please fill all fields');
        } else {
     axios.post('/user-update', {
         name: props.user.name,
+        username: props.user.username,
         father_name: props.user.father_name,
         date_of_birth: props.user.date_of_birth,
         mobile: props.user.mobile,
@@ -96,12 +102,17 @@ const submitFile = (file) => {
                                     placeholder="  Name">
                             </div>
                             <div class="col-sm-6 mb-3 mb-sm-0">
+                                 <label for="inputUsername" class="form-label">username</label>
+                                <input type="text" v-model="props.user.username" class="form-control form-control-user" id="username"
+                                    placeholder="username">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-6 mb-3 mb-sm-0">
                                  <label for="inputFatherName" class="form-label">{{ $t('father name') }}</label>
                                 <input type="text" v-model="props.user.father_name" class="form-control form-control-user" id="father_name"
                                     placeholder="  father_name">
                             </div>
-                        </div>
-                        <div class="form-group row">
                             <div class="col-sm-6 mb-3 mb-sm-0">
                                     <label for="inputDateOfBirth" class="form-label">{{ $t('date of birth') }}</label>
                                 <input type="number" v-model="props.user.date_of_birth" class="form-control form-control-user" id="date_of_birth"
@@ -145,38 +156,37 @@ const submitFile = (file) => {
          :result="result"
            />
            <div class="table-responsive">
-            <table class="table table-bordered text-center"   width="100%"  >
-                <thead>
-                 <tr>
-                    <th  >{{ $t('actions') }}</th>
-                    <th  >{{ $t('photo') }}</th>
-                 </tr>
-                </thead>
-                <tfoot>
-                </tfoot>
-                <tbody>
-                    <tr v-for="photo in props.user.photos" :key="photo.id" >
-                        <td>
-                            <button v-if="photo.name != props.user.photo"
-                            @click="deletePhoto(photo.id)"
-                            class="btn btn-danger btn-circle btn-sm m-1" >
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button
-                            @click="selectPhoto(photo.id)"
-                             v-if="photo.name != props.user.photo" class="btn btn-info btn-circle btn-sm" >
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </td>
-                        <td>
-                            <img :src="`images/user/${photo.name}`"
-                                class="img-fluid rounded-circle"
-                                alt="avatar"
-                                width="40" height="40" />
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        <InteractiveTable
+                            :columns="tableColumns"
+                            :rows="props.user.photos || []"
+                            row-key="id"
+                            search-placeholder="بحث في صور المستخدم"
+                        >
+                            <template #cell-actions="{ row }">
+                                <button v-if="row.name != props.user.photo"
+                                    @click="deletePhoto(row.id)"
+                                    class="btn btn-danger btn-circle btn-sm m-1"
+                                >
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                <button
+                                    v-if="row.name != props.user.photo"
+                                    @click="selectPhoto(row.id)"
+                                    class="btn btn-info btn-circle btn-sm"
+                                >
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </template>
+                            <template #cell-photoPreview="{ row }">
+                                <img
+                                    :src="`images/user/${row.name}`"
+                                    class="img-fluid rounded-circle"
+                                    alt="avatar"
+                                    width="40"
+                                    height="40"
+                                />
+                            </template>
+                        </InteractiveTable>
             </div>
         </div>
         </div>

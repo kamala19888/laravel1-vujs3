@@ -1,22 +1,22 @@
 <script setup>
 import { ref } from "vue";
-const email = ref("");
+const username = ref("");
 const password = ref("");
-const ruleEmail=ref([
-        v => !!v || 'Email is required',
+const ruleUsername=ref([
+        v => !!v || 'Username is required',
 
       ]);
 const rulePassword=ref([
         v => !!v || 'password is required',
-        v => (v && v.length <= 8) || 'Name must be less than 8 characters',
+        v => (v && v.length >= 6) || 'Password must be at least 6 characters',
       ]);
 const Login = () => {
-  if (email.value === "" || password.value === "") {
+  if (username.value === "" || password.value === "") {
     alert("Please fill all fields");
   } else {
     axios
       .post("/login", {
-        email: email.value,
+        username: username.value,
         password: password.value,
       })
       .then((res) => {
@@ -49,10 +49,10 @@ const Login = () => {
     <v-form validate-on="submit lazy" @submit.prevent="Login()">
       <v-text-field
       variant="solo"
-        v-model="email"
-        :rules="ruleEmail"
-        :label="$t('email')"
-        type="email"
+        v-model="username"
+        :rules="ruleUsername"
+        label="username"
+        type="text"
       ></v-text-field>
       <v-text-field
       variant="solo"
@@ -63,19 +63,7 @@ const Login = () => {
       ></v-text-field>
       <v-btn type="submit" block class="mt-2">{{ $t('Login In') }}</v-btn>
     </v-form>
-    <div class="d-flex flex-column">
-        <router-link  to="/forgot-password">
-        <v-btn type="submit" block class="mt-2"  color="warning" >{{ $t('Forgot Password') }}</v-btn>
-    </router-link>
-      <router-link  to="/register">
-      <v-btn type="submit" block class="mt-2  " color="success" >{{ $t('Create an Account') }}</v-btn>
-                     </router-link>
 
-
-
-
-
-      </div>
 
 
   </v-sheet>
