@@ -22,4 +22,24 @@ app.use(router);
 app.use(i18n);
 app.use(vuetify);
 app.use(Vue3Toast,{autoClose: 3000});
+
+const refreshFeatherIcons = () => {
+	if (window.feather && typeof window.feather.replace === 'function') {
+		window.feather.replace({
+			width: 14,
+			height: 14,
+		});
+	}
+};
+
+router.afterEach(() => {
+	setTimeout(() => {
+		refreshFeatherIcons();
+	}, 0);
+});
+
+setTimeout(() => {
+	refreshFeatherIcons();
+}, 0);
+
 app.mount('#app');

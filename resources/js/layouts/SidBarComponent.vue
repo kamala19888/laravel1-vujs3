@@ -1,21 +1,59 @@
 <script setup>
 import { ref } from 'vue'
-import { onMounted, watchEffect } from "@vue/runtime-core";
+import { onMounted } from "@vue/runtime-core";
 onMounted(async () => {
    await  getPages();
 });
 const props = defineProps([
     "toggled"]
 )
+const defaultPages = [
+  { id: 'default-admin', page: 'Admin', icon: 'fas fa-fw fa-tachometer-alt', path: '/admin', page_id: 0, pages: [] },
+  { id: 'default-users', page: 'Users', icon: 'fas fa-fw fa-users', path: '/users', page_id: 0, pages: [] },
+  { id: 'default-roles', page: 'Roles', icon: 'fas fa-fw fa-user-tag', path: '/roles', page_id: 0, pages: [] },
+  { id: 'default-pages', page: 'Pages', icon: 'fas fa-fw fa-file', path: '/pages', page_id: 0, pages: [] },
+  { id: 'default-permissions', page: 'Permissions', icon: 'fas fa-fw fa-key', path: '/permissions', page_id: 0, pages: [] },
+  { id: 'default-profile', page: 'Profile', icon: 'fas fa-fw fa-user', path: '/profile', page_id: 0, pages: [] },
+]
 const filteredSubPages=(pages,per)=>{
-    return pages.filter((page) => {
+  if (!Array.isArray(pages)) {
+    return [];
+  }
+  return pages.filter((page) => {
         return  chickPermission(page.id,per)}
         )
 }
 const textAlign = ref("left");
 const token = localStorage.getItem("token");
-const setting = JSON.parse(localStorage.getItem("setting"));
+const parseLocalJson = (key, defaultValue) => {
+  try {
+    const rawValue = localStorage.getItem(key);
+    if (!rawValue || rawValue === 'null' || rawValue === 'undefined') {
+      return defaultValue;
+    }
+    const parsed = JSON.parse(rawValue);
+    return parsed ?? defaultValue;
+  } catch (error) {
+    return defaultValue;
+  }
+}
+const setting = parseLocalJson("setting", {});
+const normalizeAssetPath = (path, fallbackPath) => {
+  if (!path || path === '#') {
+    return fallbackPath;
+  }
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  return path.startsWith('/') ? path : `/${path}`;
+}
 const chickPermission=(page_id,per)=>{
+  if (!Array.isArray(perUser.value) || perUser.value.length === 0) {
+    return true;
+  }
+  if (!Array.isArray(perUser.value)) {
+    return false;
+  }
     let permission = perUser.value.find(
         permission => permission.page_id === page_id
         && permission[per] === 1
@@ -29,16 +67,13 @@ const chickPermission=(page_id,per)=>{
 const pages = ref([]);
 const getPages = async () => {
    await  axios.get(`get-pages`).then((res) => {
-        pages.value = res.data.pages;
-        // notify(res.data.message);
-    });
+    const fetchedPages = Array.isArray(res?.data?.pages) ? res.data.pages : [];
+    pages.value = fetchedPages.length > 0 ? fetchedPages : defaultPages;
+  }).catch(() => {
+    pages.value = defaultPages;
+  });
 }
-const perUser = ref(JSON.parse(localStorage.getItem("perUser")));
-watchEffect(() => {
-    if ( perUser.value == null) {
-        window.location.reload();
-    }
-});
+const perUser = ref(parseLocalJson("perUser", []));
 </script>
 <template>
   <!-- BEGIN: Main Menu-->
@@ -52,7 +87,7 @@ watchEffect(() => {
         <li class="nav-item me-auto">
           <a href="/admin" class="logo logo-light">
             <img
-              :src="setting.logo?'/'+setting.logo:'/app-assets/images/1679163509.png'"
+              :src="normalizeAssetPath(setting.logo, '/app-assets/images/1679163509.png')"
               alt=""
               height="60"
             />
@@ -81,10 +116,10 @@ watchEffect(() => {
         data-menu="menu-navigation"
       >
         <li
-          v-for="page in pages" :key="page.id"  :class="'nav-item main'+ $route.name == page.path ? 'active': ''  "
+          v-for="page in pages" :key="page.id"  :class="`nav-item main ${$route.path === page.path ? 'active' : ''}`"
         >
         <RouterLink
-     v-if="page.path != '#' && chickPermission(page.id,'read') && page.page_id == 0"
+     v-if="page.path != '#' && chickPermission(page.id,'read') && Number(page.page_id) == 0"
      :to="page.path"
      class="nav-link"
      >

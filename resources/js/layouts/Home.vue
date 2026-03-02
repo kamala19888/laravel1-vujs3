@@ -7,28 +7,41 @@ const toggled = ref("");
 const token = localStorage.getItem("token");
 const user = ref("");
 const setting = ref({});
+const authReady = ref(!token);
 const Dir = localStorage.getItem("direction");
 const textAlign = ref("right");
 if(token){
 axios.get('/user').then((res) => {
       user.value = res.data.user;
-      setting.value = res.data.setting;
-      localStorage.setItem("perUser", JSON.stringify(res.data.user.role.permissions));
-      localStorage.setItem("setting", JSON.stringify(res.data.setting));
+  const settingData = res?.data?.setting ?? {};
+  setting.value = settingData;
+      const permissions = res?.data?.user?.role?.permissions ?? [];
+      localStorage.setItem("perUser", JSON.stringify(permissions));
+  localStorage.setItem("setting", JSON.stringify(settingData));
+      authReady.value = true;
+    }).catch((error) => {
+      if (error?.response?.status === 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("perUser");
+        localStorage.removeItem("setting");
+        window.location.href = "/login";
+      } else {
+        authReady.value = true;
+      }
     });
 }
 </script>
 <template>
   <div  >
     <!-- Sidebar -->
-    <Sidebar v-if="token" :toggled="toggled" />
+    <Sidebar v-if="token && authReady" :toggled="toggled" />
     <!-- End of Sidebar -->
     <!-- Content Wrapper -->
     <div  >
       <!-- Main Content -->
       <div  >
         <!-- Topbar -->
-        <TopBar v-if="token" @emitToggled="toggled = $event" :user="user" />
+        <TopBar v-if="token && authReady" @emitToggled="toggled = $event" :user="user" />
         <!-- End of Topbar -->
         <!-- Begin Page Content -->
         <div
@@ -47,7 +60,7 @@ axios.get('/user').then((res) => {
       </div>
       <!-- End of Main Content -->
       <!-- Footer -->
-      <Footer v-if="token" />
+      <Footer v-if="token && authReady" />
       <!-- End of Footer -->
     </div>
     <!-- End of Content Wrapper -->

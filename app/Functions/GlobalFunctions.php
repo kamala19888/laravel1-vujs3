@@ -4,10 +4,25 @@ use App\Models\Page;
 
     function get_permission($pages, $permission)
     {
-        $page_id =Page::where('page',$pages)->value('id');
-      return auth()->user()->role->permissions()
-        ->where('page_id', $page_id)
-        ->where($permission,1)
-        ->exists();
+    $user = auth()->user();
+
+    if (!$user) {
+      return false;
+    }
+
+    $pageId = Page::where('page', $pages)->value('id');
+
+    if (!$pageId) {
+      return true;
+    }
+
+    if (!$user->role) {
+      return true;
+    }
+
+    return $user->role->permissions()
+      ->where('page_id', $pageId)
+      ->where($permission, 1)
+      ->exists();
     }
 
