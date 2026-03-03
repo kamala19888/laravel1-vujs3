@@ -1,6 +1,5 @@
 <script setup>
-import { ref } from "vue";
-import { onMounted, watchEffect } from "@vue/runtime-core";
+import { onMounted, ref, watch } from "vue";
 import axios from "axios";
 import { toast } from "vue3-toastify";
 import InteractiveTable from "@/components/InteractiveTable.vue";
@@ -111,17 +110,21 @@ const tableColumns = ref([
   { key: "delete", label: "حذف", sortable: false },
 ]);
 const permissionRows = ref([]);
-watchEffect(() => {
-  // This will be called whenever role_id changes
-  console.log("role_id changed:", role_id.value);
+watch(role_id, (value) => {
+  if (!value || Number(value) === 0) {
+    Permissions.value = [];
+    return;
+  }
 
-  // You can call your getPermissions method here
   getPermissions();
+}, { immediate: true });
+
+watch(Pages, () => {
   permissionRows.value = (Pages.value || []).map((page) => ({
     ...page,
     pageName: page.page,
   }));
-});
+}, { immediate: true });
 </script>
 <template>
   <div>

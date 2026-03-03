@@ -1,19 +1,68 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import Sidebar from "./SidBarComponent.vue";
 import TopBar from "./TopBarComponent.vue";
 import Footer from "./FooterComponent.vue";
 import { applyThemeMode, getStoredThemeMode, setThemeMode } from "../utils/theme";
-const toggled = ref("");
+const DESKTOP_BREAKPOINT = 1200;
 const token = localStorage.getItem("token");
 const user = ref("");
 const setting = ref({});
 const authReady = ref(!token);
 const themeMode = ref(getStoredThemeMode());
 const activeTheme = ref(applyThemeMode(themeMode.value));
+const isSidebarCollapsed = ref(false);
+const isMobileMenuOpen = ref(false);
 let autoThemeTimer = null;
+const route = useRoute();
 const Dir = localStorage.getItem("direction");
 const textAlign = ref("right");
+
+const isDesktopViewport = () => window.innerWidth >= DESKTOP_BREAKPOINT;
+
+const applyMenuClasses = () => {
+  const body = document.body;
+  if (!body) {
+    return;
+  }
+
+  body.classList.remove("menu-collapsed", "menu-expanded", "menu-open", "vertical-overlay-menu", "vertical-menu-modern");
+  body.classList.add("footer-fixed");
+
+  if (isDesktopViewport()) {
+    body.classList.add("vertical-menu-modern");
+    body.classList.add(isSidebarCollapsed.value ? "menu-collapsed" : "menu-expanded");
+    isMobileMenuOpen.value = false;
+    return;
+  }
+
+  body.classList.add("vertical-overlay-menu");
+  if (isMobileMenuOpen.value) {
+    body.classList.add("menu-open");
+  }
+};
+
+const handleSidebarToggle = () => {
+  if (isDesktopViewport()) {
+    isSidebarCollapsed.value = !isSidebarCollapsed.value;
+  } else {
+    isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  }
+
+  applyMenuClasses();
+};
+
+const closeMobileMenu = () => {
+  if (!isDesktopViewport() && isMobileMenuOpen.value) {
+    isMobileMenuOpen.value = false;
+    applyMenuClasses();
+  }
+};
+
+const handleViewportResize = () => {
+  applyMenuClasses();
+};
 
 const changeThemeMode = (mode) => {
   themeMode.value = mode;
@@ -22,6 +71,8 @@ const changeThemeMode = (mode) => {
 
 onMounted(() => {
   activeTheme.value = applyThemeMode(themeMode.value);
+  applyMenuClasses();
+  window.addEventListener("resize", handleViewportResize);
 
   autoThemeTimer = window.setInterval(() => {
     if (themeMode.value === "auto") {
@@ -34,6 +85,11 @@ onBeforeUnmount(() => {
   if (autoThemeTimer) {
     window.clearInterval(autoThemeTimer);
   }
+  window.removeEventListener("resize", handleViewportResize);
+});
+
+watch(() => route.fullPath, () => {
+  closeMobileMenu();
 });
 
 if(token){
@@ -60,7 +116,12 @@ axios.get('/user').then((res) => {
 <template>
   <div class="app-shell">
     <!-- Sidebar -->
-    <Sidebar v-if="token && authReady" :toggled="toggled" :active-theme="activeTheme" />
+    <Sidebar v-if="token && authReady" :active-theme="activeTheme" @toggleSidebar="handleSidebarToggle" />
+    <div
+      v-if="token && authReady && isMobileMenuOpen"
+      class="sidebar-backdrop"
+      @click="closeMobileMenu"
+    ></div>
     <!-- End of Sidebar -->
     <!-- Content Wrapper -->
     <div class="app-main-wrapper">
@@ -69,7 +130,7 @@ axios.get('/user').then((res) => {
         <!-- Topbar -->
         <TopBar
           v-if="token && authReady"
-          @emitToggled="toggled = $event"
+          @emitToggled="handleSidebarToggle"
           @changeTheme="changeThemeMode"
           :user="user"
           :theme-mode="themeMode"
@@ -120,7 +181,10 @@ axios.get('/user').then((res) => {
   flex: 1 0 auto;
 }
 
-:deep(.sticky-footer) {
-  margin-top: auto;
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+  z-index: 996;
 }
 </style>

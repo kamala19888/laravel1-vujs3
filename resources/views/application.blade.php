@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=0.8">
     <meta name="author" content="PIXINVENT">
     <link rel="shortcut icon" href="{{ asset('favicon-32.png') }}">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600"
         rel="stylesheet">
     <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -14,14 +13,27 @@
     @php
         $fontFamily = data_get($setting, 'font.name_font', 'Montserrat');
         $fontSize = data_get($setting, 'font_size', 1);
+        $selectedFontPath = data_get($setting, 'font.path');
+        $selectedFontRelativePath = $selectedFontPath ? ltrim(parse_url($selectedFontPath, PHP_URL_PATH) ?? '', '/') : null;
+        $hasValidSelectedFont = $selectedFontRelativePath && file_exists(public_path($selectedFontRelativePath));
+        if (!$hasValidSelectedFont) {
+            $fontFamily = 'sans-serif';
+        }
     @endphp
     <style>
         @foreach (($fonts ?? []) as $font )
-            @font-face {
-                        font-family: {{ $font->name_font }};
-                        src: url({{( $font->path)}});
-                    }
-     @endforeach
+            @php
+                $fontPath = data_get($font, 'path');
+                $fontRelativePath = $fontPath ? ltrim(parse_url($fontPath, PHP_URL_PATH) ?? '', '/') : null;
+                $hasValidFontFile = $fontRelativePath && file_exists(public_path($fontRelativePath));
+            @endphp
+            @if($hasValidFontFile)
+                @font-face {
+                    font-family: {{ $font->name_font }};
+                    src: url({{ $fontPath }});
+                }
+            @endif
+        @endforeach
 
 
         body {

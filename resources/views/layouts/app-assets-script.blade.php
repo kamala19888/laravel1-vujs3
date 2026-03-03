@@ -11,8 +11,7 @@
 
 <!-- BEGIN: Theme JS-->
 
-<script src="{{asset('app-assets/js/core/app-menu.js')}}"></script>
-<script src="{{asset('app-assets/js/core/app.js')}}"></script>
+{{-- Legacy theme scripts are disabled for Vue SPA pages to avoid app-menu runtime errors. --}}
 
 <!-- END: Theme JS-->
 

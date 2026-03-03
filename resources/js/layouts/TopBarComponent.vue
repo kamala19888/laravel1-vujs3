@@ -1,17 +1,10 @@
 <script setup>
 import { ref } from "vue";
-const toggled = ref("");
 const emit = defineEmits(["emitToggled", "changeTheme"]);
 const props = defineProps(["user", "themeMode", "activeTheme"]);
-const lang = localStorage.getItem("lang");
+const currentLang = localStorage.getItem("lang") === "en" ? "en" : "ar";
 const sidebarToggleTop = () => {
-  if (toggled.value === "") {
-    toggled.value = "toggled";
-    emit("emitToggled", toggled.value);
-  } else {
-    toggled.value = "";
-    emit("emitToggled", toggled.value);
-  }
+  emit("emitToggled");
 };
 const messages = ref([]);
 const textAlign = ref("right");
@@ -28,6 +21,9 @@ const changeLanguage = (lang) => {
     localStorage.setItem("textAlign", "left");
   }
   window.location.reload();
+};
+const toggleLanguage = () => {
+  changeLanguage(currentLang === "ar" ? "en" : "ar");
 };
 const logout = () => {
   axios
@@ -54,7 +50,7 @@ const logout = () => {
       <div class="bookmark-wrapper d-flex align-items-center">
         <ul class="nav navbar-nav d-xl-none">
           <li class="nav-item">
-            <a class="nav-link menu-toggle" href="#">
+            <a class="nav-link menu-toggle" href="#" @click.prevent="sidebarToggleTop">
               <i class="ficon" data-feather="menu"></i>
             </a>
           </li>
@@ -142,104 +138,6 @@ const logout = () => {
             />
             <div class="search-input-close"><i data-feather="x"></i></div>
             <ul class="search-list search-list-main"></ul>
-          </div>
-        </li>
-        <li class="nav-item dropdown dropdown-language">
-          <a
-            class="nav-link dropdown-toggle"
-            id="dropdown-flag"
-            href="#"
-            data-bs-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
-            <img
-              :src="`/app-assets/images/icons/translation.png`"
-              alt="png"
-              height="32"
-            />
-            <!-- <span class="selected-language"> {{ $t('language') }}</span> -->
-          </a>
-          <div
-            class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="dropdown-flag"
-          >
-            <a
-              class="dropdown-item"
-              @click="changeLanguage('ar')"
-              data-language="ar"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              <i class="flag-icon flag-icon-ae"></i>
-              {{ $t("arabic") }}
-            </a>
-            <a
-              class="dropdown-item"
-              @click="changeLanguage('en')"
-              data-language="en"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              <i class="flag-icon flag-icon-us"></i>
-              {{ $t("english") }}
-            </a>
-            <a
-              class="dropdown-item"
-              @click="changeLanguage('tr')"
-              data-language="tr"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              <i class="flag-icon flag-icon-tr"></i>
-              {{ $t("Turkish") }}
-            </a>
-            <a
-              class="dropdown-item"
-              @click="changeLanguage('fr')"
-              data-language="fr"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              <i class="flag-icon flag-icon-fr"></i>
-              {{ $t("French") }}
-            </a>
-          </div>
-        </li>
-        <li class="nav-item dropdown dropdown-language">
-          <a
-            class="nav-link dropdown-toggle"
-            href="#"
-            data-bs-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
-            <i class="ficon" :data-feather="props.activeTheme === 'dark' ? 'moon' : 'sun'"></i>
-          </a>
-          <div class="dropdown-menu dropdown-menu-end">
-            <a
-              class="dropdown-item"
-              href="#"
-              @click.prevent="changeTheme('light')"
-              :class="{ active: props.themeMode === 'light' }"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              Light
-            </a>
-            <a
-              class="dropdown-item"
-              href="#"
-              @click.prevent="changeTheme('dark')"
-              :class="{ active: props.themeMode === 'dark' }"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              Dark
-            </a>
-            <a
-              class="dropdown-item"
-              href="#"
-              @click.prevent="changeTheme('auto')"
-              :class="{ active: props.themeMode === 'auto' }"
-              :style="`text-align: ${textAlign}!important`"
-            >
-              Auto
-            </a>
           </div>
         </li>
         <li class="nav-item dropdown dropdown-notification me-25">
@@ -404,6 +302,46 @@ const logout = () => {
             >
               <i class="me-50" data-feather="message-square"></i>
               Chats
+            </a>
+            <div class="dropdown-divider"></div>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="toggleLanguage"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              <i class="me-50" data-feather="globe"></i>
+              <span>Language: {{ currentLang === 'ar' ? 'AR' : 'EN' }}</span>
+            </a>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('light')"
+              :class="{ active: props.themeMode === 'light' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              <i class="me-50" data-feather="sun"></i>
+              Light
+            </a>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('dark')"
+              :class="{ active: props.themeMode === 'dark' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              <i class="me-50" data-feather="moon"></i>
+              Dark
+            </a>
+            <a
+              class="dropdown-item"
+              href="#"
+              @click.prevent="changeTheme('auto')"
+              :class="{ active: props.themeMode === 'auto' }"
+              :style="`text-align: ${textAlign}!important`"
+            >
+              <i class="me-50" data-feather="monitor"></i>
+              Auto
             </a>
             <div class="dropdown-divider"></div>
             <a hidden

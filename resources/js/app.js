@@ -3,14 +3,12 @@ import './plugins/axios';
 import vuetify from './vuetify'
 import './styles/theme-mode.css'
 import './styles/professional-ui.css'
-import 'vuetify/dist/vuetify.min.css';
 import 'vue-select/dist/vue-select.css'
 import v2Select from 'vue-select';
 import '@mdi/font/css/materialdesignicons.css'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import 'vuetify/styles';
 import router from './router';
-import { createApp } from 'vue';
+import { createApp, nextTick } from 'vue';
 import Home from './layouts/Home.vue';
 import JsonExcel from "vue-json-excel3";
 import Vue3Toast from 'vue3-toastify';
@@ -25,7 +23,8 @@ app.use(i18n);
 app.use(vuetify);
 app.use(Vue3Toast,{autoClose: 3000});
 
-const refreshFeatherIcons = () => {
+const refreshFeatherIcons = async () => {
+	await nextTick();
 	if (window.feather && typeof window.feather.replace === 'function') {
 		window.feather.replace({
 			width: 14,
@@ -34,14 +33,54 @@ const refreshFeatherIcons = () => {
 	}
 };
 
+let featherRefreshQueued = false;
+const queueFeatherRefresh = () => {
+	if (featherRefreshQueued) {
+		return;
+	}
+	featherRefreshQueued = true;
+	window.requestAnimationFrame(() => {
+		setTimeout(async () => {
+			await refreshFeatherIcons();
+			featherRefreshQueued = false;
+		}, 0);
+	});
+};
+
 router.afterEach(() => {
-	setTimeout(() => {
-		refreshFeatherIcons();
-	}, 0);
+	queueFeatherRefresh();
 });
 
+window.addEventListener('load', () => {
+	queueFeatherRefresh();
+});
+
+if (typeof MutationObserver !== 'undefined') {
+	const observer = new MutationObserver((mutations) => {
+		for (const mutation of mutations) {
+			for (const node of mutation.addedNodes) {
+				if (!(node instanceof Element)) {
+					continue;
+				}
+				if (
+					node.matches('i[data-feather], span[data-feather]') ||
+					node.querySelector('i[data-feather], span[data-feather]')
+				) {
+					queueFeatherRefresh();
+					return;
+				}
+			}
+		}
+	});
+
+	observer.observe(document.body, {
+		childList: true,
+		subtree: true,
+	});
+}
+
 setTimeout(() => {
-	refreshFeatherIcons();
+	queueFeatherRefresh();
 }, 0);
 
 app.mount('#app');

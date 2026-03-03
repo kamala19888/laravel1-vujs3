@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { onMounted } from "@vue/runtime-core";
+const emit = defineEmits(["toggleSidebar"]);
 onMounted(async () => {
    await  getPages();
 });
@@ -94,7 +95,7 @@ const perUser = ref(parseLocalJson("perUser", []));
           </a>
         </li>
         <li class="nav-item nav-toggle">
-          <a class="nav-link modern-nav-toggle pe-0" data-bs-toggle="collapse">
+          <a class="nav-link modern-nav-toggle pe-0" data-bs-toggle="collapse" href="#" @click.prevent="emit('toggleSidebar')">
             <i
               class="d-block d-xl-none text-primary toggle-icon font-medium-4"
               data-feather="x"

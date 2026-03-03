@@ -2,6 +2,10 @@
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
+  tableTitle: {
+    type: String,
+    default: 'قائمة البيانات',
+  },
   columns: {
     type: Array,
     default: () => [],
@@ -33,6 +37,10 @@ const props = defineProps({
   emptyText: {
     type: String,
     default: 'No data found',
+  },
+  showTopBar: {
+    type: Boolean,
+    default: true,
   },
 })
 
@@ -163,6 +171,8 @@ const pageNumbers = computed(() => {
   return Array.from({ length: totalPages.value }, (_, index) => index + 1)
 })
 
+const rowsCount = computed(() => sortedRows.value.length)
+
 const toggleSort = (column) => {
   if (column.sortable === false) {
     return
@@ -190,10 +200,55 @@ const sortIcon = (columnKey) => {
 
   return sortDirection.value === 'asc' ? '↑' : '↓'
 }
+
+const resetTableOptions = () => {
+  search.value = ''
+  currentPage.value = 1
+  pageSize.value = props.initialPageSize
+  sortKey.value = ''
+  sortDirection.value = 'asc'
+  fontSize.value = '14'
+  density.value = 'default'
+  resetVisibleColumns()
+}
 </script>
 
 <template>
   <div class="interactive-table-wrapper">
+    <div v-if="showTopBar" class="table-headbar">
+      <div class="table-headbar-title">
+        <i class="fas fa-table"></i>
+        <span>{{ tableTitle }}</span>
+        <span class="table-headbar-count">{{ rowsCount }}</span>
+      </div>
+
+      <details class="headbar-operations">
+        <summary>
+          <i class="fas fa-wrench"></i>
+          عمليات
+        </summary>
+        <div class="headbar-menu">
+          <button class="btn btn-sm btn-outline-primary w-100 mb-2" @click="resetTableOptions">
+            إعادة الضبط
+          </button>
+          <div class="headbar-menu-label">إظهار/إخفاء الأعمدة</div>
+          <label
+            v-for="column in columns"
+            :key="`headbar-col-${column.key}`"
+            class="form-check d-flex align-items-center gap-2 mb-1"
+          >
+            <input
+              v-model="visibleColumnKeys"
+              :value="column.key"
+              class="form-check-input"
+              type="checkbox"
+            />
+            <span>{{ column.label }}</span>
+          </label>
+        </div>
+      </details>
+    </div>
+
     <div class="table-tools">
       <div class="table-tools-left">
         <div class="table-tool-label">بحث سريع</div>
@@ -232,30 +287,11 @@ const sortIcon = (columnKey) => {
           </option>
         </select>
         </div>
-
-        <details class="columns-toggle">
-          <summary>الأعمدة</summary>
-          <div class="columns-menu">
-            <label
-              v-for="column in columns"
-              :key="column.key"
-              class="form-check d-flex align-items-center gap-2"
-            >
-              <input
-                v-model="visibleColumnKeys"
-                :value="column.key"
-                class="form-check-input"
-                type="checkbox"
-              />
-              <span>{{ column.label }}</span>
-            </label>
-          </div>
-        </details>
       </div>
     </div>
 
     <div class="table-responsive">
-      <table class="table table-bordered text-center" :class="densityClass" :style="tableStyle" width="100%">
+      <table class="table table-bordered text-center modern-data-table" :class="densityClass" :style="tableStyle" width="100%">
         <thead>
           <tr>
             <th
@@ -324,12 +360,94 @@ const sortIcon = (columnKey) => {
 </template>
 
 <style scoped>
+.interactive-table-wrapper {
+  border: 1px solid rgba(var(--bs-secondary-rgb), 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.table-headbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #2f3946;
+  color: #fff;
+}
+
+.table-headbar-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.table-headbar-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.headbar-operations {
+  position: relative;
+}
+
+.headbar-operations summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.84rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.headbar-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20;
+  min-width: 220px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: #fff;
+  color: #5e5873;
+  border: 1px solid #d8d6de;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.headbar-menu-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #6e6b7b;
+}
+
 .table-tools {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 0;
+  padding: 12px;
+  background: #f8f8f9;
+  border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.15);
   flex-wrap: wrap;
 }
 
@@ -360,32 +478,15 @@ const sortIcon = (columnKey) => {
   min-width: 130px;
 }
 
-.columns-toggle {
-  position: relative;
+.modern-data-table thead th {
+  background: #2f3946;
+  color: #fff;
+  border-color: #44505e;
+  font-size: 0.84rem;
 }
 
-.columns-toggle summary {
-  list-style: none;
-  cursor: pointer;
-  padding: 9px 12px;
-  border: 1px solid #d8d6de;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.columns-menu {
-  position: absolute;
-  top: 42px;
-  right: 0;
-  z-index: 10;
-  background: #fff;
-  border: 1px solid #d8d6de;
-  border-radius: 10px;
-  padding: 10px;
-  min-width: 190px;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+.modern-data-table tbody td {
+  border-color: rgba(var(--bs-secondary-rgb), 0.16);
 }
 
 .sortable-header {
@@ -426,5 +527,29 @@ const sortIcon = (columnKey) => {
 
 .interactive-table-wrapper :deep(.v-btn) {
   margin: 0 !important;
+}
+
+.dark-layout .table-tools {
+  background: #242b3d;
+  border-bottom-color: #3b4253;
+}
+
+.dark-layout .headbar-menu {
+  background: #283046;
+  color: #d0d2d6;
+  border-color: #3b4253;
+}
+
+.dark-layout .headbar-menu-label {
+  color: #b4b7bd;
+}
+
+.dark-layout .modern-data-table thead th {
+  background: #2b3344;
+  border-color: #3b4253;
+}
+
+.dark-layout .modern-data-table tbody td {
+  border-color: #3b4253;
 }
 </style>
