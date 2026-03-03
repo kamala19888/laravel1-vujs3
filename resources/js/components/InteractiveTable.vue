@@ -52,6 +52,13 @@ const sortDirection = ref('asc')
 const fontSize = ref('14')
 const density = ref('default')
 const visibleColumnKeys = ref([])
+const showControls = ref(true)
+
+const statusItems = [
+  { key: 'active', label: 'فعال', color: '#8cc63f' },
+  { key: 'expired', label: 'منتهي الصلاحية', color: '#ff9f1c' },
+  { key: 'consumed', label: 'مستهلك', color: '#d6cf3f' },
+]
 
 const resetVisibleColumns = () => {
   visibleColumnKeys.value = props.columns
@@ -211,15 +218,39 @@ const resetTableOptions = () => {
   density.value = 'default'
   resetVisibleColumns()
 }
+
+const toggleControls = () => {
+  showControls.value = !showControls.value
+}
 </script>
 
 <template>
   <div class="interactive-table-wrapper">
+    <div v-if="showTopBar" class="table-status-strip">
+      <div
+        v-for="item in statusItems"
+        :key="item.key"
+        class="status-item"
+      >
+        <span class="status-dot" :style="{ backgroundColor: item.color }"></span>
+        <span>{{ item.label }}</span>
+      </div>
+    </div>
+
     <div v-if="showTopBar" class="table-headbar">
       <div class="table-headbar-title">
         <i class="fas fa-table"></i>
         <span>{{ tableTitle }}</span>
         <span class="table-headbar-count">{{ rowsCount }}</span>
+      </div>
+
+      <div class="table-headbar-actions">
+        <button type="button" class="headbar-icon-btn" @click="toggleControls" title="إظهار/إخفاء الأدوات">
+          <i class="fas fa-sliders-h"></i>
+        </button>
+        <button type="button" class="headbar-icon-btn" @click="resetTableOptions" title="إعادة ضبط">
+          <i class="fas fa-undo"></i>
+        </button>
       </div>
 
       <details class="headbar-operations">
@@ -249,7 +280,7 @@ const resetTableOptions = () => {
       </details>
     </div>
 
-    <div class="table-tools">
+    <div v-if="showControls" class="table-tools">
       <div class="table-tools-left">
         <div class="table-tool-label">بحث سريع</div>
         <input
@@ -366,6 +397,33 @@ const resetTableOptions = () => {
   overflow: hidden;
 }
 
+.table-status-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: rgba(var(--bs-secondary-rgb), 0.12);
+  border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.15);
+}
+
+.status-item {
+  background: #f8f8f9;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #5e5873;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
 .table-headbar {
   display: flex;
   justify-content: space-between;
@@ -374,6 +432,28 @@ const resetTableOptions = () => {
   padding: 10px 12px;
   background: #2f3946;
   color: #fff;
+}
+
+.table-headbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.headbar-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headbar-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .table-headbar-title {
@@ -449,6 +529,10 @@ const resetTableOptions = () => {
   background: #f8f8f9;
   border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.15);
   flex-wrap: wrap;
+}
+
+.table-responsive {
+  margin-top: 0;
 }
 
 .table-tools-left {
@@ -532,6 +616,11 @@ const resetTableOptions = () => {
 .dark-layout .table-tools {
   background: #242b3d;
   border-bottom-color: #3b4253;
+}
+
+.dark-layout .status-item {
+  background: #2b3344;
+  color: #d0d2d6;
 }
 
 .dark-layout .headbar-menu {

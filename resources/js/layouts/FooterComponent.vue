@@ -20,7 +20,7 @@ const setting = parseSetting();
     >
         <div class="container-fluid my-auto px-2 px-sm-3 px-lg-4">
             <div class="copyright text-center my-auto footer-copy">
-                <span>Copyright &copy; {{ setting.name || 'Dashboard' }} 2024</span>
+                <span>Copyright &copy; {{ setting.name || 'SYSMAN' }} 2024</span>
             </div>
         </div>
     </footer>
